@@ -1,2 +1,0 @@
-{
-    BASELIB_CPP_INTERFACE
