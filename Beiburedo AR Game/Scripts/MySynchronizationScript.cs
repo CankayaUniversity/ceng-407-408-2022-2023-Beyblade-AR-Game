@@ -25,6 +25,9 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
     {
         rb = GetComponent<Rigidbody>();
         photonView = GetComponent<PhotonView>();
+
+        networkedPosition=new Vector3();
+        networkedRotation = new Quaternion();
     }
     // Start is called before the first frame update
     void Start()
