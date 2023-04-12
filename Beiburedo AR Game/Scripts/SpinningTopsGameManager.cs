@@ -39,44 +39,59 @@ public class SpinningTopsGameManager : MonoBehaviourPunCallbacks
 
         searchForGamesButtonGameObject.SetActive(false);
     }
+    
+    public void OnQuitMatchButtonClicked()
+    {
+
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            SceneLoader.Instance.LoadScene("Scene_Lobby");
+        }
+    }
+    
 
     #endregion
 
     #region PHOTON Callback Methods
 
-        public override void OnJoinRandomFailed(short returnCode, string message){
-            CreateAndJoinRoom();
+    public override void OnJoinRandomFailed(short returnCode, string message){
+        CreateAndJoinRoom();
+    }
+
+    public override void OnJoinedRoom(){
+        if(PhotonNetwork.CurrentRoom.PlayerCount == 1){
+            uI_InformText.text = "Joined to "+ PhotonNetwork.CurrentRoom.Name + ". Waiting for other players...";
         }
-
-        public override void OnJoinedRoom(){
-            if(PhotonNetwork.CurrentRoom.PlayerCount == 1){
-                uI_InformText.text = "Joined to "+ PhotonNetwork.CurrentRoom.Name + ". Waiting for other players...";
-            }
-            else {
-                uI_InformText.text = "Joined to "+ PhotonNetwork.CurrentRoom.Name;
-                StartCoroutine(DeactivateAfterSeconds(uI_InformPanelGameObject, 2.0f));
-            }
-            
-
-
-            Debug.Log(PhotonNetwork.NickName + "joined to " + PhotonNetwork.CurrentRoom.Name);
-        }
-
-
-        public override void OnPlayerEnteredRoom(Player newPlayer){
-            Debug.Log(newPlayer.NickName + "joined to " + PhotonNetwork.CurrentRoom.Name + "Player count" + PhotonNetwork.CurrentRoom.PlayerCount);
-
-            uI_InformText.text = newPlayer.NickName + "joined to " + PhotonNetwork.CurrentRoom.Name + "Player count" + PhotonNetwork.CurrentRoom.PlayerCount;
-
+        else {
+            uI_InformText.text = "Joined to "+ PhotonNetwork.CurrentRoom.Name;
             StartCoroutine(DeactivateAfterSeconds(uI_InformPanelGameObject, 2.0f));
         }
+        
 
 
+        Debug.Log(PhotonNetwork.NickName + "joined to " + PhotonNetwork.CurrentRoom.Name);
+    }
+    
+    public override void OnPlayerEnteredRoom(Player newPlayer){
+        Debug.Log(newPlayer.NickName + "joined to " + PhotonNetwork.CurrentRoom.Name + "Player count" + PhotonNetwork.CurrentRoom.PlayerCount);
 
+        uI_InformText.text = newPlayer.NickName + "joined to " + PhotonNetwork.CurrentRoom.Name + "Player count" + PhotonNetwork.CurrentRoom.PlayerCount;
+
+        StartCoroutine(DeactivateAfterSeconds(uI_InformPanelGameObject, 2.0f));
+    }
+    
+    public override void OnLeftRoom()
+    {
+        SceneLoader.Instance.LoadScene("Scene_Lobby");
+    }
+    
     #endregion
-
-
-    #region 
+    
+    #region PRIVATE Methods
 
     void CreateAndJoinRoom(){
 

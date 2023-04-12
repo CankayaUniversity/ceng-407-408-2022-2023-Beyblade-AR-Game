@@ -29,7 +29,7 @@ public class BattleScript : MonoBehaviourPun
     
     [Header("Player Type Damage Coefficients")]
     public float doDamage_Coefficient_Attacker = 10f; // do more damage than defender- ADVANTAGE
-    public float getDamaged_Coefficient_Attacker = 1.2f;// gets more damage - DISADVANTAGE
+    public float getDamaged_Coefficient_Attacker = 1.2f; // gets more damage - DISADVANTAGE
 
     public float doDamage_Coefficient_Defender = 0.75f; // do less damage- DISADVANTAGE
     public float getDamaged_Coefficient_Defender = 0.2f; // gets less damage - ADVANTAGE
@@ -38,6 +38,7 @@ public class BattleScript : MonoBehaviourPun
     {
         startSpinSpeed = spinnerScript.spinSpeed;
         currentSpinSpeed = spinnerScript.spinSpeed;
+        
         spinSpeedBar_Image.fillAmount = currentSpinSpeed / startSpinSpeed;
     }
     
