@@ -1,3 +1,9 @@
+/*
+ * This script will be responsible for Lobby operations like connecting to servers
+ * and loading player selection
+ */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,87 +11,91 @@ using UnityEngine.UI;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
 
+
+
 public class LobbyManager : MonoBehaviourPunCallbacks
-{ 
+{
+    // UI OBJECTS
     
-    [Header("Login UI")]
+    [Header("Login UI")] 
     public InputField playerNameInputField;
-    public GameObject uI_LoginGameobject;
+    public GameObject uI_LoginGameObject;
 
-
-
-    [Header("Lobby UI")]
-    public GameObject uI_LobbyGameobject;
-    public GameObject uI_3DGameobject;
-
-
-    [Header("Connection Status UI")]
-    public GameObject uI_ConnectionStatusGameobject;
+    [Header("Lobby UI")] 
+    public GameObject uI_LobbyGameObject;
+    public GameObject uI_3DGameObject;
+    
+    [Header("Connection Status UI")] 
+    public GameObject uI_ConnectionStatusGameObject;
     public Text connectionStatusText;
     public bool showConnectionStatus = false;
-
-
-    #region UNITY Methods
+    
+    #region Default Unity Methods
     // Start is called before the first frame update
     void Start()
     {
+
+        if (PhotonNetwork.IsConnected)
+        {
+            // Activating only Lobby UI
+            uI_LobbyGameObject.SetActive(true);
+            uI_3DGameObject.SetActive(true);
+            
+            uI_ConnectionStatusGameObject.SetActive(false);
+            uI_LoginGameObject.SetActive(false);
+        }
+        else 
+        {
+            /*
+             * First time player gets into lobby part of the game, only Login UI should be visible,
+             * and all other UI game objects should be disabled
+             */
+
+            // Activating only Login UI since user didn't connect to Photon yet
+            uI_LobbyGameObject.SetActive(false);
+            uI_3DGameObject.SetActive(false);
+            uI_ConnectionStatusGameObject.SetActive(false);
         
-        if(PhotonNetwork.IsConnected){
-            // Activating Lobby UI
-            uI_LobbyGameobject.SetActive(true);
-            uI_3DGameobject.SetActive(true);
-
-            uI_ConnectionStatusGameobject.SetActive(false);
-            uI_LoginGameobject.SetActive(false);
+            uI_LoginGameObject.SetActive(true);
         }
-        else{
-            // Activating Lobby UI when we did not connect Photon
-            uI_LobbyGameobject.SetActive(false);
-            uI_ConnectionStatusGameobject.SetActive(false);
-            uI_3DGameobject.SetActive(false);
-
-              
-            uI_LoginGameobject.SetActive(true);          
-        }
+        
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(showConnectionStatus)
-        {
+
+        if (showConnectionStatus)
+        { 
             connectionStatusText.text = "Connection Status: " + PhotonNetwork.NetworkClientState;
         }
-    }
        
-
+    }
 
     #endregion
 
-
-
     #region UI Callback Methods
+
     public void OnEnterGameButtonClicked()
     {
 
-        
-
-
         string playerName = playerNameInputField.text;
 
-        if(!string.IsNullOrEmpty(playerName))
+        if (!string.IsNullOrEmpty(playerName))
         {
-            uI_LobbyGameobject.SetActive(false);
-            uI_3DGameobject.SetActive(false);
-            uI_LoginGameobject.SetActive(false);
-
+            
+            uI_LobbyGameObject.SetActive(false);
+            uI_3DGameObject.SetActive(false);
+            uI_LoginGameObject.SetActive(false);
+            
+            uI_ConnectionStatusGameObject.SetActive(true);
             showConnectionStatus = true;
-            uI_ConnectionStatusGameobject.SetActive(true);
-
+            
             if (!PhotonNetwork.IsConnected)
             {
+                // Assigning player name to Photon server
                 PhotonNetwork.LocalPlayer.NickName = playerName;
-
                 PhotonNetwork.ConnectUsingSettings();
             }
 
@@ -94,40 +104,51 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         {
             Debug.Log("Player name is invalid or empty!");
         }
-
-
-
-}
+    }
 
     public void OnQuickMatchButtonClicked()
     {
-        //SceneManager.LoadScene("Scene_Loading");
+        // No more using that above code line because we created SceneLoader class
+        // SceneManager.LoadScene("Scene_Loading");  
+        
         SceneLoader.Instance.LoadScene("Scene_PlayerSelection");
     }
+     
+    
+
     #endregion
 
-
-
-
     #region PHOTON Callback Methods
-    public override void OnConnected()
+
+    // This callback method is called when the internet connection is established
+    public override void OnConnected() 
     {
-        Debug.Log("We connected to Internet");
+        Debug.Log("Game is connected to Internet");
+        
     }
 
+
+    // This callback method is called when the user is successfully connected to Photon server
     public override void OnConnectedToMaster()
     {
         Debug.Log(PhotonNetwork.LocalPlayer.NickName + " is connected to Photon Server");
+        Debug.Log(PhotonNetwork.NickName + " is connected to Photon Server");
 
-        uI_LobbyGameobject.SetActive(true);
-        uI_3DGameobject.SetActive(true);
-
-        uI_LoginGameobject.SetActive(false);
-        uI_ConnectionStatusGameobject.SetActive(false);
+        /*
+         * When player connects to the servers, lobby and 3D UI should be visible
+         */
+        
+        uI_LoginGameObject.SetActive(false);
+        uI_ConnectionStatusGameObject.SetActive(false);
+        
+        uI_LobbyGameObject.SetActive(true);
+        uI_3DGameObject.SetActive(true);
     }
 
-
+    public void OfflineMatch()
+    {
+        SceneLoader.Instance.LoadScene("Scene_AIPlayerSelection");
+    }
 
     #endregion
-
 }
