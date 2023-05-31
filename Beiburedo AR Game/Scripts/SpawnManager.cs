@@ -28,20 +28,20 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
-
+        
     }
     #endregion
-
+    
     private void OnDestroy()
     {
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
     }
 
-
+   
 
 
     #region Photon Callback Methods
-
+    
     // Whenever an event raised this method will be automatically called with the event data (Line 25)
     void OnEvent(EventData photonEvent)
     {
@@ -86,13 +86,13 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         }
 
 
-
+       
     }
     #endregion
 
 
     #region Private Methods
-
+    
     /*
      * Inside SpawnPlayer method, we first locally instantiated the player gameobject.
      * Then, we allocated a new and unique viewID for the player gameobject.
@@ -102,14 +102,14 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     private void SpawnPlayer()
     {
         object playerSelectionNumber;
-        if (PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(MultiplayerARSpinnerTopGame.PLAYER_SELECTION_NUMBER, out playerSelectionNumber))
+        if (PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(MultiplayerBeybladeARGame.PLAYER_SELECTION_NUMBER, out playerSelectionNumber))
         {
             Debug.Log("Player selection number is " + (int)playerSelectionNumber);
 
             int randomSpawnPoint = Random.Range(0, spawnPositions.Length - 1);
             Vector3 instantiatePosition = spawnPositions[randomSpawnPoint].position;
 
-            GameObject playerGameobject = Instantiate(playerPrefabs[(int)playerSelectionNumber], instantiatePosition, Quaternion.identity);
+            GameObject playerGameobject = Instantiate(playerPrefabs[(int)playerSelectionNumber],instantiatePosition, Quaternion.identity);
 
             PhotonView _photonView = playerGameobject.GetComponent<PhotonView>();
 
@@ -126,8 +126,8 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
                 RaiseEventOptions raiseEventOptions = new RaiseEventOptions
                 {
-                    Receivers = ReceiverGroup.Others,
-                    CachingOption = EventCaching.AddToRoomCache
+                   Receivers = ReceiverGroup.Others,
+                   CachingOption = EventCaching.AddToRoomCache
 
                 };
 
@@ -138,7 +138,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
                 };
 
                 //Raise Events!
-                PhotonNetwork.RaiseEvent((byte)RaiseEventCodes.PlayerSpawnEventCode, data, raiseEventOptions, sendOptions);
+                PhotonNetwork.RaiseEvent((byte)RaiseEventCodes.PlayerSpawnEventCode,data, raiseEventOptions,sendOptions);
 
 
             }

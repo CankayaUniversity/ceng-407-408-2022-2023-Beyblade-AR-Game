@@ -7,7 +7,7 @@ using Photon.Pun;
 using TMPro;
 using UnityEngine.SceneManagement;
 
-public class EnemyBattle : MonoBehaviourPun
+public class PlayerBattle : MonoBehaviourPun
 {
     public Spinner spinnerScript;
 
@@ -74,7 +74,7 @@ public class EnemyBattle : MonoBehaviourPun
     // This method is called when the collider of this game object has begun touching another collider
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Enemy"))
         {
 
             if (photonView.IsMine) // Instantiate sfx and vfx for local player only
@@ -91,7 +91,7 @@ public class EnemyBattle : MonoBehaviourPun
                     
                     spinSpeedBar_Image.fillAmount -= 0.05f;
                     currentSpinSpeed -= 200;
-                    spinSpeedRatio_Text.text = currentSpinSpeed + "/" + startSpinSpeed;
+                    spinSpeedRatio_Text.text = currentSpinSpeed + "/" + startSpinSpeed; 
 
                     //De-activate Collision Effect Particle System after some seconds.
                     StartCoroutine(DeactivateAfterSeconds(collisionEffectGameobject, 0.5f));
@@ -125,7 +125,7 @@ public class EnemyBattle : MonoBehaviourPun
                     // If the other player's health reaches 0, they die
                     if (collision.collider.gameObject.GetComponent<Spinner>().spinSpeed <= 0)
                     {
-                        collision.collider.gameObject.GetComponent<EnemyBattle>().Die();
+                        collision.collider.gameObject.GetComponent<PlayerBattle>().Die();
                     }
                 }
 
