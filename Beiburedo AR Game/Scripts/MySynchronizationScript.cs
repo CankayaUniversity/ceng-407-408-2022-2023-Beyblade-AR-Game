@@ -19,9 +19,9 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
 
     private float distance;
     private float angle;
-
+    
     private GameObject battleArenaGameobject;
-
+    
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -29,20 +29,20 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
 
         networkedPosition = new Vector3();
         networkedRotation = new Quaternion();
-
+        
         battleArenaGameobject = GameObject.Find("BattleArena");
     }
 
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
     private void FixedUpdate()
@@ -51,18 +51,18 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
         if (!photonView.IsMine)
         {
             // SerializationRate is the number of times per second OnPhotonSerializeView is called.
-            rb.position = Vector3.MoveTowards(rb.position, networkedPosition, distance * (1.0f / PhotonNetwork.SerializationRate));
-
-            rb.rotation = Quaternion.RotateTowards(rb.rotation, networkedRotation, angle * (1.0f / PhotonNetwork.SerializationRate));
+            rb.position = Vector3.MoveTowards(rb.position, networkedPosition, distance * (1.0f / PhotonNetwork.SerializationRate)); 
+            
+            rb.rotation = Quaternion.RotateTowards(rb.rotation, networkedRotation, angle * (1.0f / PhotonNetwork.SerializationRate) );
         }
-
+        
 
     }
 
     // PhotonStream is a container class that sends and receives data from and to a PhotonView
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-
+        
         // This isWriting bool parameter will be true if the client is the owner of the PhotonView
         if (stream.IsWriting) // Sending data
         {
@@ -70,15 +70,15 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
             // Should send position, velocity, rotation etc. data to other players
             stream.SendNext(rb.position - battleArenaGameobject.transform.position);
             stream.SendNext(rb.rotation);
-
-
+            
+            
             // Lag compensation
-            if (synchronizeVelocity)
+            if(synchronizeVelocity) 
                 stream.SendNext(rb.velocity);
-
-            if (synchronizeAngularVelocity)
+            
+            if(synchronizeAngularVelocity) 
                 stream.SendNext(rb.angularVelocity);
-
+            
         }
         else // Receiving data
         {
@@ -87,7 +87,7 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
             networkedRotation = (Quaternion)stream.ReceiveNext();
 
 
-
+            
             // Lag compensation
             if (isTeleportEnabled)
             {
@@ -98,7 +98,7 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
                 if (Vector3.Distance(rb.position, networkedPosition) > teleportIfDistanceGreaterThan)
                     rb.position = networkedPosition; // Fixing position
             }
-
+            
 
             if (synchronizeVelocity || synchronizeAngularVelocity)
             {
@@ -106,7 +106,7 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
                  * PhotonNetwork.Time is used to synchronize time for all players.
                     Since it is actually the server time, it will be the same in each client.
                  */
-
+                
                 // Delay time between sending and the receving the data (ping)
                 float lag = Math.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
 
@@ -118,7 +118,7 @@ public class MySynchronizationScript : MonoBehaviour, IPunObservable
 
                     distance = Vector3.Distance(rb.position, networkedPosition);
                 }
-
+                
                 if (synchronizeAngularVelocity)
                 {
                     rb.angularVelocity = (Vector3)stream.ReceiveNext();

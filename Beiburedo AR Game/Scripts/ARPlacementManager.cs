@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
-
 public class ARPlacementManager : MonoBehaviour
 {
     private ARRaycastManager m_ARRaycastManager;
@@ -13,6 +12,7 @@ public class ARPlacementManager : MonoBehaviour
     public Camera aRCamera;
 
     public GameObject battleArenaGameobject;
+    
     private void Awake()
     {
         m_ARRaycastManager = GetComponent<ARRaycastManager>();
@@ -27,10 +27,11 @@ public class ARPlacementManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // With this way, game gets the center of the screen and n raycast from the center of the screen
         Vector3 centerOfScreen = new Vector3(Screen.width / 2, Screen.height / 2);
         Ray ray = aRCamera.ScreenPointToRay(centerOfScreen);
 
-        if (m_ARRaycastManager.Raycast(ray, raycast_Hits, TrackableType.PlaneWithinPolygon))
+        if (m_ARRaycastManager.Raycast(ray, raycast_Hits, TrackableType.PlaneWithinPolygon)) 
         {
             // Intersection
             Pose hitPose = raycast_Hits[0].pose;

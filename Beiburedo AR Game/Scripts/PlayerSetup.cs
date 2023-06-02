@@ -1,19 +1,22 @@
+/*
+ * This script file is used to disable scripts that should not run on the local server or client while playing the game
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
+using Unity.VisualScripting;
 
 public class PlayerSetup : MonoBehaviourPun
 {
-
     public TextMeshProUGUI playerNameText;
-
-
+    
     // Start is called before the first frame update
     void Start()
     {
-        if(photonView.IsMine)
+        if (photonView.IsMine) 
         {
             // The player is local player
             transform.GetComponent<MovementController>().enabled = true;
@@ -21,14 +24,13 @@ public class PlayerSetup : MonoBehaviourPun
         }
         else
         {
-            
+            // The player is remote player
             transform.GetComponent<MovementController>().enabled = false;
             transform.GetComponent<MovementController>().joystick.gameObject.SetActive(false);
         }
+
         SetPlayerName();
-
     }
-
 
     void SetPlayerName()
     {
@@ -36,14 +38,14 @@ public class PlayerSetup : MonoBehaviourPun
         {
             if (photonView.IsMine)
             {
-                playerNameText.text = "YOU";
+                playerNameText.text = "ME";
                 playerNameText.color = Color.red;
             }
             else
             {
                 playerNameText.text = photonView.Owner.NickName;
-
             }
         }
+
     }
 }
