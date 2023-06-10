@@ -69,7 +69,7 @@ public class ARPlacementAndPlaneDetectionController : MonoBehaviour
         placeButton.SetActive(true);
         adjustButton.SetActive(false);
         searchForGameButton.SetActive(false);
-        
+
         informUIPanel_Text.text = "Move phone to detect planes and place the Battle Arena!";
 
     }
