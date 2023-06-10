@@ -15,11 +15,15 @@ public class PlayerBattle : MonoBehaviourPun
     public GameObject deathPanelUIPrefab;
     private GameObject deathPanelUIGameobject;
     public GameObject LosePanel;
+    public ParticleSystem ParticleSystem;
+
+    public EnemyBattle enemyBattle;
+    public GameObject ScorePanel;
 
     private Rigidbody rb;
 
-    private float startSpinSpeed;
-    private float currentSpinSpeed;
+    public float startSpinSpeed;
+    public float currentSpinSpeed;
     public Image spinSpeedBar_Image;
     public TextMeshProUGUI spinSpeedRatio_Text;
 
@@ -28,6 +32,7 @@ public class PlayerBattle : MonoBehaviourPun
     public bool isAttacker;
     public bool isDefender;
     private bool isDead = false;
+    private bool hasUpdatedScore = false;
 
     private bool hasRespawnStarted = false;
 
@@ -38,10 +43,14 @@ public class PlayerBattle : MonoBehaviourPun
     public float doDamage_Coefficient_Defender = 0.75f; // Do less damage - DISADVANTAGE 
     public float getDamaged_Coefficient_Defender = 0.2f; // Gets less damage - ADVANTAGE
 
+    public Text scoreText;
+
     private void Awake()
     {
+        ParticleSystem.Stop();
         startSpinSpeed = spinnerScript.spinSpeed;
         currentSpinSpeed = spinnerScript.spinSpeed;
+       AbilitiesManager.isShield = false;
 
         spinSpeedBar_Image.fillAmount = currentSpinSpeed / startSpinSpeed;
     }
@@ -88,10 +97,13 @@ public class PlayerBattle : MonoBehaviourPun
                     collisionEffectGameobject.transform.position = effectPosition;
                     collisionEffectGameobject.SetActive(true);
                     collisionEffectGameobject.GetComponentInChildren<ParticleSystem>().Play();
-                    
-                    spinSpeedBar_Image.fillAmount -= 0.05f;
-                    currentSpinSpeed -= 200;
-                    spinSpeedRatio_Text.text = currentSpinSpeed + "/" + startSpinSpeed; 
+                    if (!AbilitiesManager.isShield)
+                    {
+                        spinSpeedBar_Image.fillAmount -= 0.05f;
+                        currentSpinSpeed -= 200;
+                        spinSpeedRatio_Text.text = currentSpinSpeed + "/" + startSpinSpeed;
+                    }
+
 
                     //De-activate Collision Effect Particle System after some seconds.
                     StartCoroutine(DeactivateAfterSeconds(collisionEffectGameobject, 0.5f));
@@ -173,7 +185,7 @@ public class PlayerBattle : MonoBehaviourPun
     void Die()
     {
         isDead = true;
-
+       
         GetComponent<MovementController>().enabled = false;
         rb.freezeRotation = false;
         rb.velocity = Vector3.zero;
@@ -181,12 +193,15 @@ public class PlayerBattle : MonoBehaviourPun
 
         spinnerScript.spinSpeed = 0f;
 
+        
+
         uI_3D_Gameobject.SetActive(false);
 
         if (photonView.IsMine)
         {
             // Countdown for respawn
             StartCoroutine(ReSpawn());
+
         }
 
 
@@ -199,14 +214,14 @@ public class PlayerBattle : MonoBehaviourPun
         // Game can't instantiate this death panel gameobject everytime player get killed, it's non-sense, so check if it is null
         if (deathPanelUIGameobject == null)
         {
-            // With this line of code death panel UI object will be instantiated under canvas object in the scene
             deathPanelUIGameobject = Instantiate(deathPanelUIPrefab, canvasGameObject.transform);
         }
-        // If not null, this means game already instantiated death panel so we will just activate it since it will be probably be de-active
         else
         {
+            
             deathPanelUIGameobject.SetActive(true);
         }
+
 
         Text respawnTimeText = deathPanelUIGameobject.transform.Find("RespawnTimeText").GetComponent<Text>();
 
@@ -228,11 +243,11 @@ public class PlayerBattle : MonoBehaviourPun
             // Get the current scene
             Scene currentScene = SceneManager.GetActiveScene();
 
-            // Remove the current scene from memory
-            SceneManager.UnloadScene(currentScene);
+            // Unload the current scene asynchronously
+            SceneManager.UnloadSceneAsync(currentScene.buildIndex);
 
-            // Load the scene again
-            SceneManager.LoadScene(currentScene.name);
+            // Load the scene again asynchronously
+            SceneManager.LoadSceneAsync(currentScene.buildIndex);
         }
 
         deathPanelUIGameobject.SetActive(false);
@@ -289,6 +304,14 @@ public class PlayerBattle : MonoBehaviourPun
         if (currentSpinSpeed <= 0 && !hasRespawnStarted)
         {
             isDead = true;
+            AbilitiesManager.isShield = true;
+            AiAbilitiesManager.isShield = true;
+            ScorePanel.SetActive(true);
+            if (!hasUpdatedScore)
+            {
+                UpdateScoreText();
+                hasUpdatedScore = true;
+            }
             //LosePanel.SetActive(true);
             GetComponent<MovementController>().enabled = false;
             rb.freezeRotation = false;
@@ -325,6 +348,18 @@ public class PlayerBattle : MonoBehaviourPun
         _gameObject.SetActive(false);
 
     }
-
+    private void UpdateScoreText()
+    {
+        if (scoreText != null)
+        {
+            int enemyScore = PlayerPrefs.GetInt("EnemyScore", 0);
+            int playerScore = PlayerPrefs.GetInt("PlayerScore", 0);
+            enemyScore++;
+            PlayerPrefs.SetInt("EnemyScore", enemyScore);
+            PlayerPrefs.Save();
+            scoreText.text = "AI: " + enemyScore.ToString();
+            enemyBattle.scoreText.text = "ME: " + playerScore.ToString();
+        }
+    }
 
 }
